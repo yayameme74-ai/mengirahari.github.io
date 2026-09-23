@@ -62,6 +62,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <style>
+        /* Sembunyikan scrollbar untuk galeri swipe gaya Instagram */
+             .no-scrollbar::-webkit-scrollbar {
+             display: none;
+        }
+             .no-scrollbar {
+             -ms-overflow-style: none;
+             scrollbar-width: none;
+        }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #FFFDF9;
@@ -763,48 +771,138 @@
             });
         }
 
+        // Fungsi untuk kumpul gambar mengikut nama penghantar
         function renderGallery() {
             const grid = document.getElementById('galleryGrid');
-            const displayPhotos = currentFilter === 'Semua' ? photos : photos.filter(p => p.category === currentFilter);
-            document.getElementById('photoCount').innerText = displayPhotos.length;
-            
-            if (displayPhotos.length === 0) {
-                grid.innerHTML = '';
-                document.getElementById('emptyGallery').classList.remove('hidden');
-                return;
-            }
-            document.getElementById('emptyGallery').classList.add('hidden');
+    
+    // Tapis mengikut kategori terpilih
+            const filteredPhotos = currentFilter === 'Semua' ? photos : photos.filter(p => p.category === currentFilter);
+    
+    // Kumpulkan gambar mengikut 'name' (penghantar)
+            const groupedByUser = {};
+            filteredPhotos.forEach(photo => {
+            const userName = photo.name || 'Tanpa Nama';
+            if (!groupedByUser[userName]) {
+                groupedByUser[userName] = {
+                name: userName,
+                category: photo.category || 'Tetamu',
+                message: photo.message || '',
+                timestamp: photo.timestamp || 'Baru sahaja',
+                items: [] // Simpan senarai gambar & id untuk nama ni
+            };
+        }
+        groupedByUser[userName].items.push({
+            id: photo.id,
+            url: photo.url,
+            likes: photo.likes || 0
+        });
+    });
 
-            grid.innerHTML = displayPhotos.map(photo => `
-                <div class="bg-white/95 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 border border-blush-200 flex flex-col group">
-                    <div class="relative overflow-hidden cursor-pointer aspect-square bg-blush-50" onclick="openLightbox('${photo.id}')">
-                        <img src="${photo.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        <span class="absolute top-3 left-3 bg-white/95 text-blush-500 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-blush-200">
-                            ${photo.category || 'Tetamu'}
-                        </span>
-                    </div>
-                    <div class="p-4 flex-1 flex flex-col justify-between">
+    const groupKeys = Object.keys(groupedByUser);
+    document.getElementById('photoCount').innerText = filteredPhotos.length;
+
+    if (groupKeys.length === 0) {
+        grid.innerHTML = '';
+        document.getElementById('emptyGallery').classList.remove('hidden');
+        return;
+    }
+    
+    document.getElementById('emptyGallery').classList.add('hidden');
+
+    // Paparkan kad gaya Instagram
+    grid.innerHTML = groupKeys.map(key => {
+        const group = groupedByUser[key];
+        const isMultiple = group.items.length > 1;
+
+        // Render senarai gambar secara melintang (swipe)
+        const imagesHtml = group.items.map((item, idx) => `
+            <div class="w-full flex-shrink-0 relative aspect-square bg-blush-50 cursor-pointer" onclick="openLightbox('${item.id}')">
+                <img src="${item.url}" class="w-full h-full object-cover">
+                ${isMultiple ? `
+                    <span class="absolute top-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+                        ${idx + 1}/${group.items.length}
+                    </span>
+                ` : ''}
+            </div>
+        `).join('');
+
+        // Render titik indikator (dots) jika lebih dari 1 gambar
+        const dotsHtml = isMultiple ? `
+            <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none z-10">
+                ${group.items.map((_, idx) => `
+                    <span class="dot-indicator-${group.name.replace(/\s+/g, '')} w-1.5 h-1.5 rounded-full transition-all duration-300${idx === 0 ? 'bg-white w-3' : 'bg-white/50'}"></span>
+                `).join('')}
+            </div>
+        ` : '';
+
+        // Ambil jumlah suka (likes) dari gambar pertama atau terkumpul
+        const totalLikes = group.items.reduce((sum, item) => sum + item.likes, 0);
+        const primaryId = group.items[0].id;
+        const primaryUrl = group.items[0].url;
+
+        return `
+            <div class="bg-white/95 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 border border-blush-200 flex flex-col group">
+                <!-- Header Kad: Nama & Kategori -->
+                <div class="p-3.5 flex items-center justify-between border-b border-blush-100">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-blush-100 text-blush-500 border border-blush-200 flex items-center justify-center text-xs font-bold">
+                            ${group.name.charAt(0).toUpperCase()}
+                        </div>
                         <div>
-                            <div class="flex justify-between items-start mb-1">
-                                <h3 class="font-bold text-rosewood text-sm">${escapeHtml(photo.name)}</h3>
-                                <span class="text-[10px] text-dusty-400">${photo.timestamp || 'Baru sahaja'}</span>
-                            </div>
-                            <p class="text-xs text-dusty-500 line-clamp-2 italic mb-3">"${escapeHtml(photo.message)}"</p>
+                            <h3 class="font-bold text-rosewood text-xs">${escapeHtml(group.name)}</h3>
+                            <span class="text-[9px] text-dusty-400">${group.timestamp}</span>
                         </div>
-                        <div class="flex items-center justify-between border-t border-blush-100 pt-3 mt-auto text-xs">
-                            <button onclick="likePhoto('${photo.id}', ${photo.likes || 0})" class="flex items-center gap-1.5 text-dusty-500 hover:text-rose-500 transition">
-                                <i class="fa-solid fa-heart ${(photo.likes || 0) > 0 ? 'text-rose-500' : 'text-gray-300'}"></i>
-                                <span class="font-medium">${photo.likes || 0}</span>
-                            </button>
-                            <a href="${photo.url}" download class="text-blush-500 hover:text-blush-600 font-semibold flex items-center gap-1 bg-blush-50 hover:bg-blush-100 px-3 py-1 rounded-lg border border-blush-200 transition text-[11px]">
-                                <i class="fa-solid fa-download"></i> Simpan
-                            </a>
-                        </div>
+                    </div>
+                    <span class="bg-blush-50 text-blush-500 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-blush-200">
+                        ${group.category}
+                    </span>
+                </div>
+
+                <!-- Bahagian Gambar Swipe ala Instagram -->
+                <div class="relative overflow-hidden bg-black">
+                    <div id="slider-${group.name.replace(/\s+/g, '')}" 
+                         class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth"
+                         onscroll="updateDots(this, '${group.name.replace(/\s+/g, '')}', ${group.items.length})">
+                        ${imagesHtml}
+                    </div>
+                    ${dotsHtml}
+                </div>
+
+                <!-- Bahagian Kapsyen & Butang Suka/Simpan -->
+                <div class="p-4 flex-1 flex flex-col justify-between">
+                    <div>
+                        <p class="text-xs text-dusty-600 italic mb-3">"${escapeHtml(group.message)}"</p>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-blush-100 pt-3 mt-auto text-xs">
+                        <button onclick="likePhoto('${primaryId}', ${group.items[0].likes})" class="flex items-center gap-1.5 text-dusty-500 hover:text-rose-500 transition">
+                            <i class="fa-solid fa-heart ${totalLikes > 0 ? 'text-rose-500' : 'text-gray-300'}"></i>
+                            <span class="font-medium">${totalLikes} Suka</span>
+                        </button>
+                        <a href="${primaryUrl}" download class="text-blush-500 hover:text-blush-600 font-semibold flex items-center gap-1 bg-blush-50 hover:bg-blush-100 px-3 py-1 rounded-lg border border-blush-200 transition text-[11px]">
+                            <i class="fa-solid fa-download"></i> Simpan
+                        </a>
                     </div>
                 </div>
-            `).join('');
-        }
+            </div>
+        `;
+    }).join('');
+}
 
+// Fungsi untuk mengemas kini titik indikator (dots) semasa pengguna swipe gambar ke tepi
+function updateDots(sliderElement, groupKey, totalItems) {
+    const scrollLeft = sliderElement.scrollLeft;
+    const itemWidth = sliderElement.clientWidth;
+    const currentIndex = Math.round(scrollLeft / itemWidth);
+    
+    const dots = document.querySelectorAll(`.dot-indicator-${groupKey}`);
+    dots.forEach((dot, idx) => {
+        if (idx === currentIndex) {
+            dot.className = `dot-indicator-${groupKey} w-3 h-1.5 rounded-full transition-all duration-300 bg-white`;
+        } else {
+            dot.className = `dot-indicator-${groupKey} w-1.5 h-1.5 rounded-full transition-all duration-300 bg-white/50`;
+        }
+    });
+}
         function renderWishes() {
             const wishesList = document.getElementById('wishesList');
             wishesList.innerHTML = wishes.length === 0 
