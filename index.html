@@ -690,8 +690,12 @@
                 const formData = new FormData();
                 formData.append('chat_id', chatId);
                 formData.append('photo', file);
-                formData.append('caption', `Nama: ${guestName}\nKategori: ${guestCategory}\nUcapan: ${guestMessage || 'Momen indah bersama Aiman & Erna!'}`);
 
+                let captionText = `Nama: ${guestName}\nKategori: ${guestCategory}`;
+                if (finalMessage !== "") {
+                    captionText += `\nUcapan: ${finalMessage}`;
+                }
+        
                 return fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
                     method: 'POST',
                     body: formData
