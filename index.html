@@ -106,7 +106,6 @@
             height: 4px;
         }
 
-        /* Gold Foil Shimmer */
         .gold-gradient-text {
             background: linear-gradient(135deg, #AA7C11 0%, #D4AF37 50%, #8B6508 100%);
             -webkit-background-clip: text;
@@ -323,17 +322,17 @@
                 <p class="text-dusty-400 text-xs md:text-sm mt-1">Kongsi moment & foto menarik yang anda ambil sepanjang majlis ini berlangsung.</p>
             </div>
 
-            <!-- LANGKAH 2: Borang HTML Yang Telah Disepadukan Dengan Fungsi Telegram -->
+            <!-- Borang yang disokong: Atribut 'multiple' ditambah supaya boleh pilih banyak fail serentak -->
             <form id="uploadForm" class="space-y-6" onsubmit="uploadToTelegram(event)">
                 <div id="dropZone" class="border-2 border-dashed border-blush-300 rounded-2xl p-8 text-center bg-blush-50/50 hover:bg-blush-50 transition cursor-pointer relative group">
-                    <input type="file" id="fileInput" accept="image/*" class="hidden" multiple required>
+                    <input type="file" id="fileInput" accept="image/*" multiple required class="hidden">
                     
                     <div id="uploadPrompt" class="space-y-3">
                         <div class="w-14 h-14 bg-white text-blush-400 rounded-full border border-blush-200 flex items-center justify-center mx-auto text-xl shadow-sm group-hover:scale-105 transition">
                             <i class="fa-solid fa-camera-retro"></i>
                         </div>
                         <div>
-                            <p class="font-medium text-rosewood text-sm">Tekan untuk ambil / pilih gambar atau <span class="text-blush-500 underline">tarik fail ke sini</span></p>
+                            <p class="font-medium text-rosewood text-sm">Tekan untuk pilih <span class="text-blush-500 font-bold underline">banyak gambar</span> serentak atau tarik ke sini</p>
                         </div>
                     </div>
 
@@ -449,7 +448,6 @@
             appId: "1:903105897317:web:c8ff41b0fa29024c0ab78c"
         };
 
-        // Initialize Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -527,7 +525,6 @@
             animatePetals();
         }
 
-        /* --- App State & Data --- */
         let photos = [];
         let wishes = [];
         let currentFilter = 'Semua';
@@ -581,9 +578,7 @@
             setupEventListeners();
         };
 
-        // Realtime Sync with Firebase Firestore
         function initRealtimeSync() {
-            // Listen to Photos Collection
             db.collection("wedding_photos").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
                 photos = [];
                 snapshot.forEach((doc) => {
@@ -594,7 +589,6 @@
                 console.error("Error getting photos: ", error);
             });
 
-            // Listen to Wishes Collection
             db.collection("wedding_wishes").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
                 wishes = [];
                 snapshot.forEach((doc) => {
@@ -643,8 +637,6 @@
             document.getElementById('rsvpWishForm').addEventListener('submit', handleRsvpSubmit);
         }
 
-        let selectedFilesData = [];
-
         function handleFileSelect() {
             const files = Array.from(document.getElementById('fileInput').files);
             if (files.length === 0) return;
@@ -652,12 +644,10 @@
             previewContainer.innerHTML = '';
             previewContainer.classList.remove('hidden');
             document.getElementById('uploadPrompt').classList.add('hidden');
-            selectedFilesData = [];
 
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    selectedFilesData.push({ fileObj: file, dataUrl: e.target.result });
                     const imgWrapper = document.createElement('div');
                     imgWrapper.className = 'relative aspect-square rounded-xl overflow-hidden border border-blush-200 shadow-sm';
                     imgWrapper.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
@@ -667,12 +657,10 @@
             });
         }
 
-        /* --- LANGKAH 3: Kod JavaScript Integrasi Telegram Bot --- */
         async function uploadToTelegram(event) {
             event.preventDefault();
             
-            // Gantikan dengan Token Bot dan Chat ID Telegram anda yang sebenar
-            const token = "8800942714:AAGXgoNq-SDKrBvGMLP0YeqeC-cY71An5XA"; 
+            const token = "8800942714:AAFDvra6BXycUIC9VER-z_oLNNXQMDYIs9U"; 
             const chatId = "5965855949";
             
             const guestName = document.getElementById('guestName').value.trim();
@@ -703,12 +691,10 @@
                 .then(response => response.json())
                 .then(result => {
                     if (result.ok) {
-                        // Ambil saiz foto terbesar dari respons Telegram
                         const photosArray = result.result.photo;
                         const bestPhoto = photosArray[photosArray.length - 1];
                         const fileId = bestPhoto.file_id;
 
-                        // Dapatkan pautan fail sebenar daripada Telegram menggunakan getFile
                         return fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`)
                             .then(res => res.json())
                             .then(fileResult => {
@@ -716,7 +702,6 @@
                                     const filePath = fileResult.result.file_path;
                                     const downloadURL = `https://api.telegram.org/file/bot${token}/${filePath}`;
 
-                                    // Simpan pautan URL Telegram ke Firestore supaya terpapar di galeri web
                                     return db.collection("wedding_photos").add({
                                         url: downloadURL,
                                         name: guestName,
@@ -738,10 +723,9 @@
                 document.getElementById('uploadForm').reset();
                 document.getElementById('previewContainer').classList.add('hidden');
                 document.getElementById('uploadPrompt').classList.remove('hidden');
-                selectedFilesData = [];
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i><span>Muat Naik Ke Galeri Awam</span>`;
-                showToast('Gambar berjaya dimuat naik!');
+                showToast('Gambar berjaya dimuat naik & dikemas kini!');
                 document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
             }).catch(error => {
                 console.error("Error uploading: ", error);
@@ -874,7 +858,6 @@
             document.getElementById('lightboxLikesCount').innerText = photo.likes || 0;
             document.getElementById('lightboxDownloadBtn').href = photo.url;
             document.getElementById('lightboxLikeBtn').onclick = () => likePhoto(photo.id, photo.likes || 0);
-            document.getElementById('lightbox').classList.add('hidden'); // placeholder bug fix
             document.getElementById('lightbox').classList.remove('hidden');
         }
 
