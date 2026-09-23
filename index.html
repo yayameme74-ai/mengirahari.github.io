@@ -140,9 +140,28 @@
     <!-- Opening Overlay -->
     <div id="openingOverlay" class="fixed inset-0 z-50 bg-gradient-to-b from-blush-50 via-cream to-blush-100 flex flex-col items-center justify-center p-4 transition-all duration-700">
         
-        <div class="absolute -top-10 -right-10 w-48 md:w-64 opacity-80 pointer-events-none z-10 animate-pulse">
-            <img src="https://i.ibb.co/68Z764K/floral-corner.png" alt="Bunga Atas" class="w-full h-full object-contain transform rotate-90">
-        </div>
+        <div class="absolute -top-4 left-0 right-0 w-full flex justify-between pointer-events-none z-10 px-2">
+    <!-- Bunga Kiri Atas -->
+             <div class="w-40 md:w-56 transform -rotate-12 animate-pulse duration-1000">
+                  <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400&auto=format&fit=crop" alt="Bunga" class="w-full h-auto object-contain opacity-90 drop-shadow-md rounded-b-full">
+             </div>
+    <!-- Bunga Kanan Atas -->
+             <div class="w-40 md:w-56 transform rotate-12 scale-x-[-1] animate-pulse duration-1000">
+                  <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400&auto=format&fit=crop" alt="Bunga" class="w-full h-auto object-contain opacity-90 drop-shadow-md rounded-b-full">
+             </div>
+         </div>
+
+<!-- Bunga Hiasan Bawah (Bergerak Lembut) -->
+        <div class="absolute -bottom-4 left-0 right-0 w-full flex justify-between pointer-events-none z-10 px-2">
+    <!-- Bunga Kiri Bawah -->
+             <div class="w-40 md:w-56 transform rotate-6 animate-pulse duration-1000">
+                  <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400&auto=format&fit=crop" alt="Bunga" class="w-full h-auto object-contain opacity-90 drop-shadow-md rounded-t-full">
+             </div>
+    <!-- Bunga Kanan Bawah -->
+             <div class="w-40 md:w-56 transform -rotate-6 scale-x-[-1] animate-pulse duration-1000">
+                  <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400&auto=format&fit=crop" alt="Bunga" class="w-full h-auto object-contain opacity-90 drop-shadow-md rounded-t-full">
+             </div>
+         </div>
 
         <div class="absolute -bottom-10 -left-10 w-48 md:w-64 opacity-80 pointer-events-none z-10">
             <img src="https://i.ibb.co/68Z764K/floral-corner.png" alt="Bunga Bawah" class="w-full h-full object-contain transform -rotate-90">
