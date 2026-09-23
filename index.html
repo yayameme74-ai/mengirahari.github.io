@@ -7,7 +7,7 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
+    <script>8800942714:AAGt-FJZekMAbm_N9Rvhh22A3leQa8C5prA
         tailwind.config = {
             theme: {
                 extend: {
@@ -672,7 +672,7 @@
             event.preventDefault();
             
             // Gantikan dengan Token Bot dan Chat ID Telegram anda yang sebenar
-            const token = "8800942714:AAFDvra6BXycUIC9VER-z_oLNNXQMDYIs9U"; 
+            const token = "8800942714:AAGt-FJZekMAbm_N9Rvhh22A3leQa8C5prA"; 
             const chatId = "5965855949";
             
             const guestName = document.getElementById('guestName').value.trim();
@@ -688,7 +688,7 @@
 
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Sedang Hantar ke Telegram...</span>`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Sedang Menghantar...</span>`;
 
             let uploadPromises = Array.from(files).map(file => {
                 const formData = new FormData();
@@ -747,7 +747,7 @@
                 console.error("Error uploading: ", error);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i><span>Muat Naik Ke Galeri Awam</span>`;
-                showToast('Gagal memuat naik gambar. Sila semak Token Telegram anda.');
+                showToast('Gagal memuat naik gambar');
             });
         }
 
